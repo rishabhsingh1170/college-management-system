@@ -2,23 +2,13 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mysql from "mysql2/promise";
+import { pool } from "./config/database.js";
 
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-// MySQL connection pool
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || "localhost",
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "cms",
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-});
 
 // Basic route
 app.get("/", (req, res) => {
@@ -169,5 +159,6 @@ app.post("/api/faculty/attendance", authenticateToken, async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
+    pool();
 });

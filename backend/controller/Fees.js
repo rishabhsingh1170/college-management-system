@@ -8,6 +8,10 @@ export const getFees = async (req, res) => {
     ]);
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    console.log("error in get fee controller", err);
+    res.status(500).json({
+      success:false,
+      message: "Server error" 
+    });
   }
 };

@@ -7,10 +7,15 @@ import { getFees } from "../controller/Fees.js";
 
 const router = express.Router();
 
-router.get("/marks",authenticateToken , getResult);
-router.get("/attendance", authenticateToken, getAttendance);
-router.get("/exam-timetable", authenticateToken, getTimetable);
-router.get("/fees", authenticateToken, getFees);
+//get attendence
+router.get("/get-attendence",authenticateToken, getAttendance);
+
+//get result of a semester
+router.get("/get-result",authenticateToken, getResult);
+
+//get fees details;
+router.get("/get-fees-details", authenticateToken, getFees);
+
 
 
 export default router;

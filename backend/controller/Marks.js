@@ -1,4 +1,4 @@
-//get student marks
+// Get student marks (Result)
 export const getResult = async (req, res) => {
   if (req.user.user_type !== "student") return res.sendStatus(403);
   const { semester_id } = req.query;
@@ -30,22 +30,20 @@ export const getResult = async (req, res) => {
   }
 };
 
-//set student marks
+// Set student marks
 export const updateMarks = async (req, res) => {
-  async (req, res) => {
-    if (req.user.role !== "faculty") return res.sendStatus(403);
-    const { student_id, subject, marks, exam } = req.body;
-    if (!student_id || !subject || marks == null || !exam) {
-      return res.status(400).json({ message: "All fields required" });
-    }
-    try {
-      await pool.query(
-        "INSERT INTO marks (student_id, subject, marks, exam) VALUES (?, ?, ?, ?)",
-        [student_id, subject, marks, exam]
-      );
-      res.json({ message: "Marks added" });
-    } catch (err) {
-      res.status(500).json({ message: "Server error" });
-    }
-  };
+  if (req.user.user_type !== "faculty") return res.sendStatus(403);
+  const { student_id, subject_id, exam_id, marks, grade } = req.body;
+  if (!student_id || !subject_id || !exam_id || marks == null) {
+    return res.status(400).json({ message: "All fields required" });
+  }
+  try {
+    await pool.query(
+      "INSERT INTO SubjectMarks (subject_id, student_id, exam_id, marks, grade) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE marks = VALUES(marks), grade = VALUES(grade)",
+      [subject_id, student_id, exam_id, marks, grade || null]
+    );
+    res.json({ message: "Marks added/updated" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
 };

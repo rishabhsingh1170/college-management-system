@@ -1,4 +1,3 @@
-
 import jwt from "jsonwebtoken";
 import { pool } from "../config/database.js";
 const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
@@ -41,11 +40,16 @@ export const signup = async (req, res) => {
         ]
       );
       userId = studentResult.insertId;
-      // Insert into AuthenticatePersons
-      await pool.query(
+      // Insert into AuthenticatePersons and update Student.auth_id
+      const [authResult] = await pool.query(
         "INSERT INTO AuthenticatePersons (password, user_type, student_id, faculty_id) VALUES (?, 'student', ?, NULL)",
         [password, userId]
       );
+      const authId = authResult.insertId;
+      await pool.query("UPDATE Student SET auth_id = ? WHERE student_id = ?", [
+        authId,
+        userId,
+      ]);
     } else if (user_type === "faculty") {
       // Insert into Faculty table
       const [facultyResult] = await pool.query(
@@ -60,11 +64,16 @@ export const signup = async (req, res) => {
         ]
       );
       userId = facultyResult.insertId;
-      // Insert into AuthenticatePersons
-      await pool.query(
+      // Insert into AuthenticatePersons and update Faculty.auth_id
+      const [authResult] = await pool.query(
         "INSERT INTO AuthenticatePersons (password, user_type, student_id, faculty_id) VALUES (?, 'faculty', NULL, ?)",
         [password, userId]
       );
+      const authId = authResult.insertId;
+      await pool.query("UPDATE Faculty SET auth_id = ? WHERE faculty_id = ?", [
+        authId,
+        userId,
+      ]);
     } else {
       return res.status(400).json({ message: "Invalid user_type" });
     }

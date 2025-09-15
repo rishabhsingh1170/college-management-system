@@ -8,9 +8,12 @@ import {
 
 const router = express.Router();
 
-router.post("/api/faculty/marks", authenticateToken, updateMarks);
+//take attendence
+router.post("/take-attendence", authenticateToken, updateAttendance);
 
-router.post("/api/faculty/attendance", authenticateToken, updateAttendance);
+//give marks
+router.post("/give-marks", authenticateToken, updateMarks);
+
 // Get attendance of all students for a subject and date
 router.get(
   "/api/faculty/attendance",

@@ -19,11 +19,6 @@ ADD CONSTRAINT fk_student_auth
 
 -- 2. Authentication module
 
---there is circular dependency between Student, Faculty and AuthenticatePersons
----- Step 1: Create Student and Faculty without auth_id FK
--- Step 2: Create AuthenticatePersons
--- Step 3: Alter Student and Faculty to add auth_id FK
-
 CREATE TABLE AuthenticatePersons (
     auth_id INT AUTO_INCREMENT PRIMARY KEY, 
     password VARCHAR(255) NOT NULL,

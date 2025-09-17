@@ -6,11 +6,15 @@ import studentRoutes from "./routes/Student.js";
 import facultyRoutes from "./routes/Faculty.js";
 import { pool } from "./config/database.js";
 
-
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173", // frontend origin
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Basic route

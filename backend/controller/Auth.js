@@ -21,7 +21,7 @@ export const signup = async (req, res) => {
   if (!user_type || !name || !email || !password) {
     return res
       .status(400)
-      .json({ message: "user_type, name, email, and password required" });
+      .json({ message: "required fields are missing" });
   }
   try {
     let userId;
@@ -88,42 +88,41 @@ export const signup = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  const { user_type, email, password } = req.body;
-  if (!user_type || !email || !password) {
+  const { user_type, username, password } = req.body;
+
+  if (!user_type || !username || !password) {
     return res
       .status(400)
-      .json({ message: "user_type, email, and password required" });
+      .json({ message: "required fields are missing" });
   }
   try {
-    // Find the user in AuthenticatePersons
-    let query =
-      "SELECT * FROM AuthenticatePersons WHERE user_type = ? AND password = ? ";
-    let [authRows] = await pool.query(query, [user_type, password]);
+    let authQuery =
+      "SELECT * FROM AuthenticatePersons WHERE user_type = ? AND password = ?";
+    let [authRows] = await pool.query(authQuery, [user_type, password]);
     if (authRows.length === 0) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
     const authUser = authRows[0];
     let userInfo = {};
     if (user_type === "student") {
-      // Get student info by email
+      // Find student by auth_id and username (email or name)
       const [studentRows] = await pool.query(
-        "SELECT * FROM Student WHERE student_id = ? AND email = ?",
-        [authUser.student_id, email]
+        "SELECT * FROM Student WHERE auth_id = ? AND (email = ? OR name = ?)",
+        [authUser.auth_id, username, username]
       );
       if (studentRows.length === 0)
         return res.status(401).json({ message: "Invalid credentials" });
       userInfo = studentRows[0];
     } else if (user_type === "faculty") {
-      // Get faculty info by email
+      // Find faculty by auth_id and username (email or name)
       const [facultyRows] = await pool.query(
-        "SELECT * FROM Faculty WHERE faculty_id = ? AND email = ?",
-        [authUser.faculty_id, email]
+        "SELECT * FROM Faculty WHERE auth_id = ? AND (email = ? OR name = ?)",
+        [authUser.auth_id, username, username]
       );
       if (facultyRows.length === 0)
         return res.status(401).json({ message: "Invalid credentials" });
       userInfo = facultyRows[0];
     } else if (user_type === "admin") {
-      // For admin, just return authUser
       userInfo = { name: "Admin", email: null };
     }
     const token = jwt.sign(
@@ -131,8 +130,8 @@ export const login = async (req, res) => {
         id: authUser.auth_id,
         user_type,
         name: userInfo.name,
-        student_id: authUser.student_id,
-        faculty_id: authUser.faculty_id,
+        student_id: userInfo.student_id,
+        faculty_id: userInfo.faculty_id,
       },
       JWT_SECRET,
       { expiresIn: "1d" }
@@ -141,8 +140,8 @@ export const login = async (req, res) => {
       token,
       user_type,
       name: userInfo.name,
-      student_id: authUser.student_id,
-      faculty_id: authUser.faculty_id,
+      student_id: userInfo.student_id,
+      faculty_id: userInfo.faculty_id,
     });
   } catch (err) {
     res.status(500).json({ message: "Server error" });

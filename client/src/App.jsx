@@ -3,11 +3,23 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import toast, { Toaster } from "react-hot-toast";
+import {
+  FaUserCircle,
+  FaBell,
+  FaUserGraduate,
+  FaChalkboardTeacher,
+  FaBook,
+  FaHeadset,
+  FaClipboardList,
+  FaAddressCard,
+  FaQuestionCircle,
+  FaDollarSign,
+  FaCalendarAlt,
+  FaCheckCircle,
+} from "react-icons/fa";
 
 //layouts
-import AdminLayout from "../src/pages/AdminLayout";
-import UserLayout from "../src/pages/UserLayout";
-import FacultyLayout from "../src/pages/FacultyLayour";
+import DashboardLayout from "./pages/DashboardLayout";
 
 //Faculty Page
 import ProfileFact from "./components/faculty/ProfileFact";
@@ -34,10 +46,9 @@ import LibraryDetails from "./components/admin/LibraryDetails";
 import SupportAdmin from "./components/admin/SupportAdmin";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
-import MobileMenu from "./components/common/MobileMenu"; // Corrected import path
-import ForgotPassword from "./pages/ForgetPassword";
-import VerifyOTP from "./pages/VerifyOTP";
-import ResetPassword from "./pages/ResetPassword";
+import MobileMenu from "./components/common/MobileMenu";
+import ProtectedRoute from "./components/common/ProtectedRoute";
+import Attendance from "./components/user/Attendence";
 
 function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -62,6 +73,33 @@ function App() {
     });
   }, []);
 
+  const adminNavItems = [
+    { name: "Profile", path: "profile", icon: FaUserCircle },
+    { name: "Notifications", path: "notification", icon: FaBell },
+    { name: "Students", path: "student-list", icon: FaUserGraduate },
+    { name: "Faculty", path: "faculty-list", icon: FaChalkboardTeacher },
+    { name: "Library", path: "library", icon: FaBook },
+    { name: "Support", path: "support", icon: FaHeadset },
+  ];
+
+  const userNavItems = [
+    { name: "Profile", path: "profile", icon: FaUserCircle },
+    { name: "Notifications", path: "notification", icon: FaBell },
+    { name: "Track Attendence", path: "get-attendance", icon: FaCalendarAlt },
+    { name: "Results", path: "results", icon: FaClipboardList },
+    { name: "Admission", path: "admission", icon: FaAddressCard },
+    { name: "Help", path: "help", icon: FaQuestionCircle },
+  ];
+
+  const facultyNavItems = [
+    { name: "Profile", path: "profile", icon: FaUserCircle },
+    { name: "Notifications", path: "notification", icon: FaBell },
+    { name: "Salary", path: "salary", icon: FaDollarSign },
+    { name: "Courses", path: "cources", icon: FaBook },
+    { name: "TimeTable", path: "timetable", icon: FaCalendarAlt },
+    { name: "Attendance", path: "attendence", icon: FaCheckCircle },
+  ];
+
   return (
     <>
       <Toaster position="top-center" />
@@ -84,34 +122,56 @@ function App() {
               }
             />
             <Route path="/login" element={<Login />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/verify-otp" element={<VerifyOTP />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
 
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route path="notification" element={<NotificationAdmin />} />
-              <Route path="student-list" element={<StudentList />} />
-              <Route path="student-details" element={<StudentDetails />} />
-              <Route path="faculty-list" element={<FacultyList />} />
-              <Route path="library" element={<LibraryDetails />} />
-              <Route path="support" element={<SupportAdmin />} />
-            </Route>
+            <Route element={<ProtectedRoute />}>
+              {/* Admin Dashboard */}
+              <Route
+                path="/admin"
+                element={
+                  <DashboardLayout userType="admin" navItems={adminNavItems} />
+                }
+              >
+                <Route path="profile" element={<ProfileFact />} />
+                <Route path="notification" element={<NotificationAdmin />} />
+                <Route path="student-list" element={<StudentList />} />
+                <Route path="student-details" element={<StudentDetails />} />
+                <Route path="faculty-list" element={<FacultyList />} />
+                <Route path="library" element={<LibraryDetails />} />
+                <Route path="support" element={<SupportAdmin />} />
+              </Route>
 
-            <Route path="/faculty" element={<FacultyLayout />}>
-              <Route path="profile" element={<ProfileFact />} />
-              <Route path="notification" element={<NotificationFact />} />
-              <Route path="salary" element={<Salary />} />
-              <Route path="cources" element={<Cources />} />
-              <Route path="timetable" element={<TimeTable />} />
-              <Route path="attendence" element={<Attendence />} />
-            </Route>
+              {/* Faculty Dashboard */}
+              <Route
+                path="/faculty"
+                element={
+                  <DashboardLayout
+                    userType="faculty"
+                    navItems={facultyNavItems}
+                  />
+                }
+              >
+                <Route path="profile" element={<ProfileFact />} />
+                <Route path="notification" element={<NotificationFact />} />
+                <Route path="salary" element={<Salary />} />
+                <Route path="cources" element={<Cources />} />
+                <Route path="timetable" element={<TimeTable />} />
+                <Route path="attendence" element={<Attendence />} />
+              </Route>
 
-            <Route path="/user" element={<UserLayout />}>
-              <Route path="profile" element={<ProfileUser />} />
-              <Route path="notification" element={<NotificationUser />} />
-              <Route path="results" element={<ResultUser />} />
-              <Route path="admission" element={<AdmissionUser />} />
-              <Route path="help" element={<HelpUser />} />
+              {/* User Dashboard */}
+              <Route
+                path="/user"
+                element={
+                  <DashboardLayout userType="student" navItems={userNavItems} />
+                }
+              >
+                <Route path="profile" element={<ProfileUser />} />
+                <Route path="notification" element={<NotificationUser />} />
+                <Route path="get-attendance" element={<Attendance />} />
+                <Route path="results" element={<ResultUser />} />
+                <Route path="admission" element={<AdmissionUser />} />
+                <Route path="help" element={<HelpUser />} />
+              </Route>
             </Route>
 
             <Route path="*" element={<NotFound />} />

@@ -33,8 +33,8 @@ app.get("/api/v1/db-check", async (req, res) => {
 });
 
 app.use("/api/v1/auth", userRoutes);
-app.use("/api/v1/student/", studentRoutes);
-app.use("/api/v1/faculty/", facultyRoutes);
+app.use("/api/v1/student", studentRoutes);
+app.use("/api/v1/faculty", facultyRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

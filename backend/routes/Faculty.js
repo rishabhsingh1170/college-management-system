@@ -5,6 +5,7 @@ import {
   updateAttendance,
   getAttendanceOfAllStudent,
 } from "../controller/Attendence.js";
+import { getNotifications } from "../controller/notification.js";
 
 const router = express.Router();
 

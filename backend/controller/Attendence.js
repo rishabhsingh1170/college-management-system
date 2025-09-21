@@ -1,3 +1,10 @@
+import jwt from "jsonwebtoken";
+import { pool } from "../config/database.js"; // Your database connection pool
+import dotenv from "dotenv";
+
+dotenv.config();
+const JWT_SECRET = process.env.JWT_SECRET
+
 // Get attendance of all students for a subject and date
 export const getAttendanceOfAllStudent = async (req, res) => {
   if (req.user.user_type !== "faculty") return res.sendStatus(403);
@@ -37,56 +44,84 @@ export const getAttendanceOfAllStudent = async (req, res) => {
 };
 
 //get attendence of a student;
-export const getAttendance = async (req, res) => {
-  if (req.user.user_type !== "student") return res.sendStatus(403);
+export const getStudentAttendance = async (req, res) => {
   try {
-    // Get the student's semester_id
-    const [studentRows] = await pool.query(
-      "SELECT semester_id FROM Student WHERE student_id = ?",
-      [req.user.student_id]
-    );
-    if (studentRows.length === 0) {
-      return res.status(404).json({ message: "Student not found" });
+    const authHeader = req.headers["authorization"];
+    const token = authHeader?.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
     }
-    const semester_id = studentRows[0].semester_id;
 
-    // Get all subjects for this semester
-    const [subjectRows] = await pool.query(
-      "SELECT subject_id, subject_name FROM Subjects WHERE semester_id = ?",
-      [semester_id]
-    );
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({ message: "Invalid token" });
+    }
 
-    // For each subject, get attended_classes and total_classes
-    const attendanceSummary = [];
-    for (const subject of subjectRows) {
-      // Total classes held for this subject
-      const [totalClassRows] = await pool.query(
-        "SELECT COUNT(DISTINCT date) as total_classes FROM Attendance WHERE subject_id = ?",
-        [subject.subject_id]
-      );
-      const total_classes = totalClassRows[0]?.total_classes || 0;
+    if (decoded.user_type !== "student") {
+      return res
+        .status(403)
+        .json({ message: "Access denied. Student role required." });
+    }
 
-      // Classes attended by student for this subject
-      const [attendedRows] = await pool.query(
-        "SELECT COUNT(*) as attended_classes FROM Attendance WHERE subject_id = ? AND student_id = ? AND status = 'Present'",
-        [subject.subject_id, req.user.student_id]
-      );
-      const attended_classes = attendedRows[0]?.attended_classes || 0;
+    const studentId = decoded.student_id;
 
-      attendanceSummary.push({
-        subject_id: subject.subject_id,
-        subject_name: subject.subject_name,
-        attended_classes,
-        total_classes,
+    // SQL query to get raw attendance counts per subject and semester
+    const query = `
+      SELECT
+        s.semester_no,
+        sub.subject_name,
+        SUM(CASE WHEN a.status = 'Present' THEN 1 ELSE 0 END) AS present_count,
+        SUM(CASE WHEN a.status = 'Absent' THEN 1 ELSE 0 END) AS absent_count,
+        COUNT(a.status) AS total_classes
+      FROM Attendance a
+      JOIN Subjects sub ON a.subject_id = sub.subject_id
+      JOIN Semester s ON sub.semester_id = s.semester_id
+      WHERE a.student_id = ?
+      GROUP BY s.semester_no, sub.subject_name
+      ORDER BY s.semester_no, sub.subject_name;
+    `;
+    const [rows] = await pool.query(query, [studentId]);
+
+    if (rows.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No attendance records found for this student." });
+    }
+
+    // --- Data Transformation: Convert flat SQL result into nested JSON structure ---
+    const semesters = {};
+    rows.forEach((row) => {
+      const semesterKey = `Semester ${row.semester_no}`;
+      if (!semesters[semesterKey]) {
+        semesters[semesterKey] = {
+          semester: semesterKey,
+          subjects: [],
+        };
+      }
+
+      const totalClasses = row.total_classes;
+      const percentage =
+        totalClasses > 0
+          ? ((row.present_count / totalClasses) * 100).toFixed(2)
+          : 0;
+
+      semesters[semesterKey].subjects.push({
+        subject_name: row.subject_name,
+        present_count: row.present_count,
+        absent_count: row.absent_count,
+        total_classes: totalClasses,
+        percentage: parseFloat(percentage),
       });
-    }
-    res.json(attendanceSummary);
-  } catch (err) {
-    console.log("error in getAttendance controller", err);
-    res.status(500).json({
-      success: false,
-      message: "Server error",
     });
+
+    const result = Object.values(semesters);
+    res.json(result);
+  } catch (err) {
+    console.error("Server error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
 

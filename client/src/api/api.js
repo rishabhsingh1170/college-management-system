@@ -10,6 +10,33 @@ const api = axios.create({
   },
 });
 
+// Request Interceptor: Automatically adds the JWT to every request
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response Interceptor: Globally handles errors (e.g., 401 Unauthorized)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // If the response is a 401 (Unauthorized), redirect to the login page
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/login"; // Force a redirect
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const getRequest = (url, config = {}) => api.get(url, config);
 
 export const postRequest = (url, data, config = {}) =>

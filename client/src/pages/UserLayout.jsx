@@ -11,6 +11,7 @@ import {
 const userNavItems = [
   { name: "Profile", path: "profile", icon: FaUserCircle },
   { name: "Notifications", path: "notification", icon: FaBell },
+  { name: "Track Attendence", path: "get-attendance", icon: FaBell },
   { name: "Results", path: "results", icon: FaClipboardList },
   { name: "Admission", path: "admission", icon: FaAddressCard },
   { name: "Help", path: "help", icon: FaQuestionCircle },

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   FaEnvelope,
   FaPhone,
@@ -11,66 +11,122 @@ import {
   FaBriefcase,
   FaUserTie,
 } from "react-icons/fa";
+import { getRequest } from "../../api/api";
+import toast from "react-hot-toast";
+import AOS from "aos";
 
-// Mock data for different user types
-const userProfiles = {
+// We'll use this data for properties the API doesn't return
+const defaultProfiles = {
   student: {
     photo:
       "https://tse2.mm.bing.net/th/id/OIP.bunDCjSjB6yognR-L7SpQgHaHa?pid=Api&P=0&h=180",
-    name: "Aarav Sharma",
     role: "Student",
-    id: "S-12345",
-    email: "aarav.sharma@example.edu",
-    phone: "+91 9876543210",
-    dateOfBirth: "15/05/2004",
-    department: "Computer Science",
     year: "3rd Year",
-    course: "B.Tech",
+    id: "N/A",
+    name: "N/A",
+    email: "N/A",
+    phone: "N/A",
+    dateOfBirth: "N/A",
+    department: "N/A",
+    course: "N/A",
   },
   faculty: {
     photo:
       "https://tse2.mm.bing.net/th/id/OIP.bunDCjSjB6yognR-L7SpQgHaHa?pid=Api&P=0&h=180",
-    name: "Dr. Ananya Singh",
     role: "Professor",
-    id: "F-67890",
-    email: "ananya.singh@example.edu",
-    phone: "+91 9988776655",
-    dateOfBirth: "22/10/1980",
-    department: "Electronics & Communication",
-    specialization: "VLSI Design",
-    joiningDate: "05/08/2010",
+    specialization: "N/A",
+    joiningDate: "N/A",
+    id: "N/A",
+    name: "N/A",
+    email: "N/A",
+    phone: "N/A",
+    dateOfBirth: "N/A",
+    department: "N/A",
   },
   admin: {
     photo:
       "https://tse2.mm.bing.net/th/id/OIP.bunDCjSjB6yognR-L7SpQgHaHa?pid=Api&P=0&h=180",
-    name: "Mr. Rajeev Kumar",
     role: "Administrator",
-    id: "A-54321",
-    email: "rajeev.kumar@example.edu",
-    phone: "+91 9123456789",
-    dateOfBirth: "01/03/1975",
-    position: "Registrar",
-    department: "Administration",
-    joiningDate: "10/01/2005",
+    position: "N/A",
+    department: "N/A",
+    joiningDate: "N/A",
+    id: "N/A",
+    name: "N/A",
+    email: "N/A",
+    phone: "N/A",
+    dateOfBirth: "N/A",
   },
 };
 
 const Profile = ({ userType }) => {
-  const user = userProfiles[userType];
+  const [user, setUser] = useState(defaultProfiles[userType]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  if (!user) {
+  // This hook forces AOS to refresh, which is the fix
+  useEffect(() => {
+    AOS.refresh();
+  }, []);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      let endpoint = "";
+      if (userType === "student") {
+        endpoint = "/student/profile";
+      } else if (userType === "faculty") {
+        endpoint = "/faculty/profile";
+      } else if (userType === "admin") {
+        endpoint = "/admin/profile";
+      }
+
+      if (!endpoint) {
+        setError("Invalid user type.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        toast.loading("Fetching profile data...", { id: "profile-fetch" });
+        const response = await getRequest(endpoint);
+
+        // This is the key change: merge the fetched data with the default data
+        const combinedUser = { ...defaultProfiles[userType], ...response.data };
+        setUser(combinedUser);
+
+        toast.dismiss("profile-fetch");
+        toast.success("Profile data loaded successfully!");
+      } catch (err) {
+        setError("Failed to fetch profile data.");
+        console.error("API Error:", err);
+        toast.error("Error fetching profile data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [userType]);
+
+  // Handle loading and error states first
+  if (loading) {
     return (
-      <div className="p-8 text-center text-red-500">
-        User profile not found.
-      </div>
+      <div className="p-8 text-center text-gray-500">Loading profile...</div>
     );
   }
 
+  if (error) {
+    return <div className="p-8 text-center text-red-500">{error}</div>;
+  }
+
+  // Helper function to format the date
+  const formatDate = (dateString) => {
+    if (!dateString || dateString === "N/A") return "N/A";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-IN");
+  };
+
   return (
-    <div
-      className="p-6 md:p-8 bg-white rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-[1.01] max-w-4xl mx-auto"
-      data-aos="fade-up"
-    >
+    <div className="p-6 md:p-8 bg-white rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-[1.01] max-w-4xl mx-auto animate-fadeInUp">
       <div className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
         {/* Profile Image Section */}
         <div className="flex-shrink-0">
@@ -111,7 +167,7 @@ const Profile = ({ userType }) => {
           </div>
           <div className="flex items-center space-x-3 text-gray-700">
             <FaBirthdayCake className="text-blue-500" />
-            <span>Date of Birth: {user.dateOfBirth}</span>
+            <span>Date of Birth: {formatDate(user.dateOfBirth)}</span>
           </div>
         </div>
       </div>

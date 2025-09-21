@@ -1,21 +1,20 @@
 import express from "express";
-import { login, signup, getPersonalInfo } from "../controller/Auth.js";
-import { getAttendance, updateAttendance } from "../controller/Attendence.js";
-import { getResult, updateMarks } from "../controller/Marks.js";
-import { getFees } from "../controller/Fees.js";
+import { login, signup} from "../controller/Auth.js";
 import {
   requestPasswordReset,
   verifyOtp,
   resetPassword,
 } from "../controller/PasswordReset.js";
+import { authenticateToken } from "../middleware/auth.js";
+import { getNotifications } from "../controller/notification.js";
 
 const router = express.Router();
 
 // login route
 router.post("/login", login);
 
-// get personal info route
-router.get("/me", getPersonalInfo);
+//get notification for student
+router.get("/notifications", authenticateToken, getNotifications);
 
 // Password reset routes
 router.post("/forgot-password", requestPasswordReset);

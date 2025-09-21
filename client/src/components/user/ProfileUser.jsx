@@ -4,7 +4,7 @@ import Profile from '../common/Profile';
 const ProfileUser = () => {
   return (
     <div>
-      return <Profile userType="student" />;
+      <Profile userType="student" />;
     </div>
   );
 }

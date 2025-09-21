@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useNavigate } from "react-router-dom";
 import {
   FaUserCircle,
   FaBell,
@@ -11,9 +11,16 @@ import {
 
 const DashboardLayout = ({ userType, navItems }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  // This is the new logout function
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // 1. Clear the token
+    navigate("/login"); // 2. Navigate to the login page
   };
 
   return (
@@ -53,20 +60,20 @@ const DashboardLayout = ({ userType, navItems }) => {
           </ul>
         </nav>
         <div className="mt-auto">
-          <Link
-            to="/login"
-            className="flex items-center space-x-3 p-3 rounded-lg text-red-400 hover:bg-red-900 transition-colors duration-200"
+          <button
+            onClick={handleLogout}
+            className="flex items-center space-x-3 p-3 w-full rounded-lg text-red-400 hover:bg-red-900 transition-colors duration-200"
           >
             <FaSignOutAlt className="text-xl" />
             <span>Log Out</span>
-          </Link>
+          </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-x-hidden overflow-y-auto">
         <header className="flex items-center justify-between p-4 bg-white shadow-md md:pl-80">
-            <div className=""></div>
+          <div className=""></div>
           <h2 className="text-xl md:text-2xl lg:-ml-40 font-semibold text-gray-800 capitalize">
             {userType} Dashboard
           </h2>

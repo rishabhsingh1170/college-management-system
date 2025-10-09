@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import userRoutes from "./routes/User.js";
+import adminRoutes from "./routes/Admin.js";
 import studentRoutes from "./routes/Student.js";
 import facultyRoutes from "./routes/Faculty.js";
 import { pool } from "./config/database.js";
@@ -33,6 +34,7 @@ app.get("/api/v1/db-check", async (req, res) => {
 });
 
 app.use("/api/v1/auth", userRoutes);
+app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/student", studentRoutes);
 app.use("/api/v1/faculty", facultyRoutes);
 

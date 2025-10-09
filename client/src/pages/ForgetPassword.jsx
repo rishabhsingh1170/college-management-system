@@ -32,7 +32,7 @@ function ForgotPassword() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await postRequest("/auth/forgot-password");
+      const res = await postRequest("/auth/forgot-password", { email: email });
 
       console.log(res);
       toast.success("OTP sent to your email!");

@@ -28,7 +28,7 @@ function ResetPassword() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { token, email } = location.state || {};
+  const { otp, email } = location.state || {};
 
   useEffect(() => {
     AOS.init({ duration: 1000, once: true });
@@ -45,9 +45,9 @@ function ResetPassword() {
     setLoading(true);
 
     try {
-      const res = await postRequest("/v1/auth/reset-password", {
+      const res = await postRequest("/auth/reset-password", {
         email,
-        token,
+        otp,
         password,
       });
 

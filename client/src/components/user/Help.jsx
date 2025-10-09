@@ -22,11 +22,11 @@ const faqs = [
     answer:
       "You can update your personal details by navigating to the 'Profile' section in your dashboard. Click on the 'Edit' button and save your changes after making the necessary updates.",
   },
-  {
-    question: "Where can I find my course schedule?",
-    answer:
-      "Your complete course timetable is available under the 'TimeTable' section in your dashboard. You can also sync it with your personal calendar.",
-  },
+  // {
+  //   question: "Where can I find my course schedule?",
+  //   answer:
+  //     "Your complete course timetable is available under the 'TimeTable' section in your dashboard. You can also sync it with your personal calendar.",
+  // },
   {
     question: "I forgot my password. How can I reset it?",
     answer:

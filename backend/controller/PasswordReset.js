@@ -1,64 +1,60 @@
 import transporter from "../config/mailer.js";
 import { pool } from "../config/database.js";
-import crypto from "crypto";
+import bcrypt from "bcrypt";
+const SALT_ROUNDS = 10; // The cost factor for bcrypt hashing
 
 export const requestPasswordReset = async (req, res) => {
   const { email } = req.body;
-  if (!email) return res.status(400).json({ message: "Email required" });
-
-  // Find user by email in Student or Faculty, then get auth_id from AuthenticatePersons
-  let studentId = null,
-    facultyId = null,
-    authId = null;
-  let [rows] = await pool.query(
-    "SELECT student_id FROM Student WHERE email = ?",
-    [email]
-  );
-  if (rows.length > 0) {
-    studentId = rows[0].student_id;
-    let [authRows] = await pool.query(
-      "SELECT auth_id FROM AuthenticatePersons WHERE student_id = ?",
-      [studentId]
-    );
-    if (authRows.length > 0) authId = authRows[0].auth_id;
-  } else {
-    [rows] = await pool.query(
-      "SELECT faculty_id FROM Faculty WHERE email = ?",
-      [email]
-    );
-    if (rows.length > 0) {
-      facultyId = rows[0].faculty_id;
-      let [authRows] = await pool.query(
-        "SELECT auth_id FROM AuthenticatePersons WHERE faculty_id = ?",
-        [facultyId]
-      );
-      if (authRows.length > 0) authId = authRows[0].auth_id;
-    }
+  // console.log(email);
+  if (!email) {
+    return res
+      .status(400)
+      .json({ message: "Email is required to request a password reset." });
   }
-  if (!authId) return res.status(404).json({ message: "User not found" });
 
-  // Generate OTP
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+  try {
+    const [rows] = await pool.query(
+      "SELECT auth_id, 'student' AS user_type FROM Student WHERE email = ? UNION SELECT auth_id, 'faculty' AS user_type FROM Faculty WHERE email = ?",
+      [email, email]
+    );
 
-  // Store OTP in DB
-  await pool.query(
-    "INSERT INTO PasswordResetOTPs (email, otp, expires_at) VALUES (?, ?, ?)",
-    [email, otp, expiresAt]
-  );
+    if (rows.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "User with this email not found." });
+    }
 
-  // Send OTP email
-  await transporter.sendMail({
-    from: process.env.EMAIL_USER,
-    to: email,
-    subject: "Password Reset OTP",
-    text: `Your OTP is: ${otp}`,
-  });
-  res.json({ message: "OTP sent to email" });
+    const { auth_id, user_type } = rows[0];
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    // This query deletes the previous OTP and inserts a new one in a single step
+    await pool.query(
+      "INSERT INTO PasswordResetOTPs (email, otp, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE otp = VALUES(otp), expires_at = VALUES(expires_at), used = FALSE",
+      [email, otp, expiresAt]
+    );
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Password Reset OTP",
+      text: `Your OTP is: ${otp}`,
+    });
+
+    res
+      .status(200)
+      .json({ message: "An OTP has been sent to your email.", email: email });
+  } catch (err) {
+    console.error("Server error:", err);
+    res
+      .status(500)
+      .json({ message: "An unexpected server error occurred." });
+  }
 };
 
 export const verifyOtp = async (req, res) => {
   const { email, otp } = req.body;
+  // console.log(email);
   if (!email || !otp)
     return res.status(400).json({ message: "Email and OTP required" });
   const [rows] = await pool.query(
@@ -74,57 +70,65 @@ export const verifyOtp = async (req, res) => {
 };
 
 export const resetPassword = async (req, res) => {
-  const { email, otp, newPassword } = req.body;
-  if (!email || !otp || !newPassword)
-    return res.status(400).json({ message: "All fields required" });
-  const [rows] = await pool.query(
-    "SELECT * FROM PasswordResetOTPs WHERE email = ? AND otp = ? AND used = FALSE ORDER BY created_at DESC LIMIT 1",
-    [email, otp]
-  );
-  if (!rows.length) return res.status(400).json({ message: "Invalid OTP" });
-  const record = rows[0];
-  if (new Date(record.expires_at) < new Date()) {
-    return res.status(400).json({ message: "OTP expired" });
+  const { email, otp, password } = req.body;
+  console.log(email);
+  if (!email || !otp || !password) {
+    return res.status(400).json({ message: "All fields are required" });
   }
-  // Find auth_id by email in Student or Faculty, then update password
-  let studentId = null,
-    facultyId = null,
-    authId = null;
-  let [userRows] = await pool.query(
-    "SELECT student_id FROM Student WHERE email = ?",
-    [email]
-  );
-  if (userRows.length > 0) {
-    studentId = userRows[0].student_id;
-    let [authRows] = await pool.query(
-      "SELECT auth_id FROM AuthenticatePersons WHERE student_id = ?",
-      [studentId]
+
+  let conn;
+  try {
+    // Check for valid and unexpired OTP in one query
+    const [otpRows] = await pool.query(
+      "SELECT * FROM PasswordResetOTPs WHERE email = ? AND otp = ? AND used = FALSE ORDER BY created_at DESC LIMIT 1",
+      [email, otp]
     );
-    if (authRows.length > 0) authId = authRows[0].auth_id;
-  } else {
-    [userRows] = await pool.query(
-      "SELECT faculty_id FROM Faculty WHERE email = ?",
-      [email]
-    );
-    if (userRows.length > 0) {
-      facultyId = userRows[0].faculty_id;
-      let [authRows] = await pool.query(
-        "SELECT auth_id FROM AuthenticatePersons WHERE faculty_id = ?",
-        [facultyId]
-      );
-      if (authRows.length > 0) authId = authRows[0].auth_id;
+
+    if (otpRows.length === 0) {
+      return res.status(400).json({ message: "Invalid or already used OTP." });
     }
+    const record = otpRows[0];
+
+    if (new Date(record.expires_at) < new Date()) {
+      return res.status(400).json({ message: "OTP expired." });
+    }
+
+    // Corrected SQL logic: Find the user's auth_id efficiently
+    const [userRows] = await pool.query(
+      "SELECT auth_id FROM Student WHERE email = ? UNION SELECT auth_id FROM Faculty WHERE email = ?",
+      [email, email]
+    );
+
+    if (userRows.length === 0) {
+      return res.status(404).json({ message: "User not found." });
+    }
+    const authId = userRows[0].auth_id;
+
+    // Hash the new password with bcrypt
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
+    // Use a database transaction to ensure atomicity
+    conn = await pool.getConnection();
+    await conn.beginTransaction();
+
+    await conn.query(
+      "UPDATE AuthenticatePersons SET password = ? WHERE auth_id = ?",
+      [hashedPassword, authId]
+    );
+
+    await conn.query(
+      "UPDATE PasswordResetOTPs SET used = TRUE WHERE id = ?",
+      [record.id]
+    );
+
+    await conn.commit();
+    res.json({ message: "Password reset successful." });
+
+  } catch (err) {
+    if (conn) await conn.rollback();
+    console.error("Server error:", err);
+    res.status(500).json({ message: "Server error" });
+  } finally {
+    if (conn) conn.release();
   }
-  if (!authId) return res.status(404).json({ message: "User not found" });
-  // Hash password
-  const hashed = crypto.createHash("sha256").update(newPassword).digest("hex");
-  await pool.query(
-    "UPDATE AuthenticatePersons SET password = ? WHERE auth_id = ?",
-    [hashed, authId]
-  );
-  // Mark OTP as used
-  await pool.query("UPDATE PasswordResetOTPs SET used = TRUE WHERE id = ?", [
-    record.id,
-  ]);
-  res.json({ message: "Password reset successful" });
 };

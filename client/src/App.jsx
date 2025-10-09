@@ -26,7 +26,6 @@ import ProfileFact from "./components/faculty/ProfileFact";
 import NotificationFact from "./components/faculty/NotificationFact";
 import Salary from "./components/faculty/Salary";
 import Cources from "./components/faculty/Cources";
-import TimeTable from "./components/faculty/TimeTable";
 import Attendence from "./components/faculty/Attendence";
 
 //user page
@@ -45,10 +44,13 @@ import FacultyList from "./components/admin/FacultyList";
 import LibraryDetails from "./components/admin/LibraryDetails";
 import SupportAdmin from "./components/admin/SupportAdmin";
 import Login from "./pages/Login";
+import ForgetPassword from "./pages/ForgetPassword";
 import Home from "./pages/Home";
 import MobileMenu from "./components/common/MobileMenu";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import Attendance from "./components/user/Attendence";
+import VerifyOTP from "./pages/VerifyOTP";
+import ResetPassword from './pages/ResetPassword'
 
 function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -87,7 +89,8 @@ function App() {
     { name: "Notifications", path: "notification", icon: FaBell },
     { name: "Track Attendence", path: "get-attendance", icon: FaCalendarAlt },
     { name: "Results", path: "results", icon: FaClipboardList },
-    { name: "Admission", path: "admission", icon: FaAddressCard },
+    // { name: "Admission", path: "admission", icon: FaAddressCard },
+    { name: "Fees", path: "fees", icon: FaDollarSign },
     { name: "Help", path: "help", icon: FaQuestionCircle },
   ];
 
@@ -96,7 +99,6 @@ function App() {
     { name: "Notifications", path: "notification", icon: FaBell },
     { name: "Salary", path: "salary", icon: FaDollarSign },
     { name: "Courses", path: "cources", icon: FaBook },
-    { name: "TimeTable", path: "timetable", icon: FaCalendarAlt },
     { name: "Attendance", path: "attendence", icon: FaCheckCircle },
   ];
 
@@ -122,6 +124,9 @@ function App() {
               }
             />
             <Route path="/login" element={<Login />} />
+            <Route path="forgot-password" element={<ForgetPassword />} />
+            <Route path="verify-otp" element={<VerifyOTP />} />
+            <Route path="reset-password" element = {<ResetPassword/>}/>
 
             <Route element={<ProtectedRoute />}>
               {/* Admin Dashboard */}
@@ -154,7 +159,6 @@ function App() {
                 <Route path="notification" element={<NotificationFact />} />
                 <Route path="salary" element={<Salary />} />
                 <Route path="cources" element={<Cources />} />
-                <Route path="timetable" element={<TimeTable />} />
                 <Route path="attendence" element={<Attendence />} />
               </Route>
 

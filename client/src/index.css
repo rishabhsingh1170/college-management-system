@@ -35,7 +35,7 @@ html {
 }
 
 .animate-float {
-  animation: float 4s ease-in-out infinite;
+  animation: float 1s ease-in-out;
 }
 
 @keyframes fadeInUp {
@@ -62,5 +62,5 @@ html {
 }
 
 .animate-fadeInUp {
-  animation: fadeInUp 0.5s ease-out forwards;
+  animation: fadeInUp 1s ease-out forwards;
 }

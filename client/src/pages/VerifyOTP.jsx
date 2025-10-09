@@ -44,10 +44,10 @@ function VerifyOTP() {
     }
 
     try {
-      const res = await postRequest("/v1/auth/verify-otp", { email, otp });
+      const res = await postRequest("/auth/verify-otp", { email, otp });
 
       toast.success("OTP verified!");
-      navigate("/reset-password", { state: { token: res.data.token, email } });
+      navigate("/reset-password", { state: { otp, email } });
     } catch (err) {
       toast.error(
         err.response?.data?.message || "Invalid OTP. Please try again."

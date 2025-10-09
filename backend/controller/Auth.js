@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { pool } from "../config/database.js";
 const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
+import bcrypt from 'bcrypt';
 
 // Signup controller for student and faculty
 export const signup = async (req, res) => {
@@ -91,10 +92,9 @@ export const login = async (req, res) => {
   const { user_type, username, password } = req.body;
 
   if (!user_type || !username || !password) {
-    return res
-      .status(400)
-      .json({ message: "required fields are missing" });
+    return res.status(400).json({ message: "required fields are missing" });
   }
+
   try {
     let authQuery =
       "SELECT * FROM AuthenticatePersons WHERE user_type = ? AND password = ?";
@@ -104,38 +104,39 @@ export const login = async (req, res) => {
     }
     const authUser = authRows[0];
     let userInfo = {};
+
+    // Key Change: Combine Faculty and Admin logic
     if (user_type === "student") {
-      // Find student by auth_id and username (email or name)
       const [studentRows] = await pool.query(
-        "SELECT * FROM Student WHERE auth_id = ? AND (email = ? OR name = ?)",
+        "SELECT student_id, name, email FROM Student WHERE auth_id = ? AND (email = ? OR name = ?)",
         [authUser.auth_id, username, username]
       );
       if (studentRows.length === 0)
         return res.status(401).json({ message: "Invalid credentials" });
       userInfo = studentRows[0];
-    } else if (user_type === "faculty") {
-      // Find faculty by auth_id and username (email or name)
+    } else if (user_type === "faculty" || user_type === "admin") {
+      // Find faculty/admin by auth_id and username
       const [facultyRows] = await pool.query(
-        "SELECT * FROM Faculty WHERE auth_id = ? AND (email = ? OR name = ?)",
+        "SELECT faculty_id, name, email FROM Faculty WHERE auth_id = ? AND (email = ? OR name = ?)",
         [authUser.auth_id, username, username]
       );
       if (facultyRows.length === 0)
         return res.status(401).json({ message: "Invalid credentials" });
       userInfo = facultyRows[0];
-    } else if (user_type === "admin") {
-      userInfo = { name: "Admin", email: null };
+    } else {
+      return res.status(400).json({ message: "Invalid user_type" });
     }
-    const token = jwt.sign(
-      {
-        id: authUser.auth_id,
-        user_type,
-        name: userInfo.name,
-        student_id: userInfo.student_id,
-        faculty_id: userInfo.faculty_id,
-      },
-      JWT_SECRET,
-      { expiresIn: "1d" }
-    );
+
+    const tokenPayload = {
+      user_type,
+      name: userInfo.name,
+      id: authUser.auth_id,
+      student_id: userInfo.student_id,
+      faculty_id: userInfo.faculty_id,
+    };
+
+    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: "1d" });
+
     res.json({
       token,
       user_type,
@@ -148,4 +149,75 @@ export const login = async (req, res) => {
   }
 };
 
+//can't be used beacuse some passwords are store in plane text
 
+// export const login = async (req, res) => {
+//   const { user_type, username, password } = req.body;
+
+//   if (!user_type || !username || !password) {
+//     return res.status(400).json({ message: "Required fields are missing" });
+//   }
+
+//   try {
+//     // Corrected logic: Use a single query to find the user in the appropriate table
+//     let userQuery = '';
+//     let userTable = '';
+
+//     if (user_type === "student") {
+//         userTable = 'Student';
+//         userQuery = "SELECT auth_id, student_id AS user_specific_id, name FROM Student WHERE email = ? OR name = ?";
+//     } else if (user_type === "faculty" || user_type === "admin") {
+//         userTable = 'Faculty';
+//         userQuery = "SELECT auth_id, faculty_id AS user_specific_id, name FROM Faculty WHERE email = ? OR name = ?";
+//     } else {
+//         return res.status(400).json({ message: "Invalid user_type" });
+//     }
+
+//     const [userRows] = await pool.query(userQuery, [username, username]);
+//     if (userRows.length === 0) {
+//         return res.status(401).json({ message: "Invalid credentials" });
+//     }
+//     const userInfo = userRows[0];
+
+//     // Corrected logic: Fetch the hashed password from the AuthenticatePersons table
+//     const [authRows] = await pool.query(
+//         "SELECT password FROM AuthenticatePersons WHERE auth_id = ?",
+//         [userInfo.auth_id]
+//     );
+//     if (authRows.length === 0) {
+//         return res.status(401).json({ message: "Invalid credentials" });
+//     }
+//     const storedHashedPassword = authRows[0].password;
+
+//     // Securely compare the password using bcrypt
+//     const isPasswordCorrect = await bcrypt.compare(password, storedHashedPassword);
+//     if (!isPasswordCorrect) {
+//         return res.status(401).json({ message: "Invalid credentials" });
+//     }
+
+//     // Prepare a clean JWT payload
+//     const tokenPayload = {
+//       user_type: user_type,
+//       auth_id: userInfo.auth_id,
+//       name: userInfo.name
+//     };
+//     if (user_type === 'student') {
+//         tokenPayload.student_id = userInfo.user_specific_id;
+//     } else {
+//         tokenPayload.faculty_id = userInfo.user_specific_id;
+//     }
+
+//     const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: "1d" });
+
+//     res.json({
+//       token,
+//       user_type: tokenPayload.user_type,
+//       name: tokenPayload.name,
+//       student_id: tokenPayload.student_id,
+//       faculty_id: tokenPayload.faculty_id,
+//     });
+
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };

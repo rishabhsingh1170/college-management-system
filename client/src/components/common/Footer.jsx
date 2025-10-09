@@ -106,7 +106,7 @@ const Footer = () => {
           <div data-aos="fade-up" data-aos-delay="300">
             <h4 className="text-lg font-semibold text-white mb-4">Contact</h4>
             <ul className="space-y-2 text-sm">
-              <li>123 College Ave, University City, CA 12345</li>
+              <li>ABCD, Bhopal, Madhaya Pradesh</li>
               <li>
                 Email:{" "}
                 <a
@@ -116,7 +116,7 @@ const Footer = () => {
                   info@college.edu
                 </a>
               </li>
-              <li>Phone: +1 (123) 456-7890</li>
+              <li>Phone: +91 62017XXXXX</li>
             </ul>
             <div className="flex space-x-4 mt-4 text-xl">
               <a

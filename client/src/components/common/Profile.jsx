@@ -76,7 +76,7 @@ const Profile = ({ userType }) => {
       } else if (userType === "faculty") {
         endpoint = "/faculty/profile";
       } else if (userType === "admin") {
-        endpoint = "/admin/profile";
+        endpoint = "/faculty/profile";
       }
 
       if (!endpoint) {

@@ -126,40 +126,78 @@ export const getStudentAttendance = async (req, res) => {
 };
 
 //set attendence of a student
-export const updateAttendance = async (req, res) => {
-  if (req.user.user_type !== "faculty") return res.sendStatus(403);
-  const { subject_id, date, presentStudentIds, allStudentIds } = req.body;
-  if (
-    !subject_id ||
-    !date ||
-    !Array.isArray(presentStudentIds) ||
-    !Array.isArray(allStudentIds)
-  ) {
-    return res.status(400).json({
-      message:
-        "subject_id, date, presentStudentIds, and allStudentIds are required",
-    });
-  }
+export const submitAttendance = async (req, res) => {
+  let conn;
   try {
-    // Mark present students
-    for (const student_id of presentStudentIds) {
-      await pool.query(
-        "INSERT INTO Attendance (student_id, subject_id, date, status) VALUES (?, ?, ?, 'Present')",
-        [student_id, subject_id, date]
-      );
+    const authHeader = req.headers["authorization"];
+    const token = authHeader?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "No token provided" });
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({ message: "Invalid token" });
     }
-    // Mark absent students (those not in presentStudentIds)
-    const absentStudentIds = allStudentIds.filter(
-      (id) => !presentStudentIds.includes(id)
-    );
-    for (const student_id of absentStudentIds) {
-      await pool.query(
-        "INSERT INTO Attendance (student_id, subject_id, date, status) VALUES (?, ?, ?, 'Absent')",
-        [student_id, subject_id, date]
-      );
+    if (decoded.user_type !== "faculty")
+      return res
+        .status(403)
+        .json({ message: "Access denied. Faculty role required." });
+
+    const { attendanceRecords } = req.body;
+    if (
+      !attendanceRecords ||
+      !Array.isArray(attendanceRecords) ||
+      attendanceRecords.length === 0
+    ) {
+      return res.status(400).json({ message: "Invalid attendance data." });
     }
-    res.json({ message: "Attendance updated" });
+
+    const subjectId = attendanceRecords[0].subject_id;
+    const submissionDate = attendanceRecords[0].date;
+
+    // New Logic: Check for existing submission
+    const checkQuery = `
+      SELECT COUNT(*) AS count
+      FROM Attendance
+      WHERE subject_id = ? AND date = ?;
+    `;
+    const [checkRows] = await pool.query(checkQuery, [
+      subjectId,
+      submissionDate,
+    ]);
+    if (checkRows[0].count > 0) {
+      return res
+        .status(409)
+        .json({
+          message:
+            "Attendance for this subject and date has already been submitted.",
+        });
+    }
+
+    const insertQuery = `
+      INSERT INTO Attendance (student_id, subject_id, date, status)
+      VALUES (?, ?, ?, ?);
+    `;
+
+    conn = await pool.getConnection();
+    await conn.beginTransaction();
+
+    for (const record of attendanceRecords) {
+      await conn.query(insertQuery, [
+        record.student_id,
+        record.subject_id,
+        record.date,
+        record.status,
+      ]);
+    }
+
+    await conn.commit();
+    res.status(201).json({ message: "Attendance submitted successfully." });
   } catch (err) {
+    if (conn) await conn.rollback();
+    console.error("Server error:", err);
     res.status(500).json({ message: "Server error" });
+  } finally {
+    if (conn) conn.release();
   }
 };

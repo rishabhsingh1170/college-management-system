@@ -26,11 +26,11 @@ const ContactSection = () => {
             </p>
             <div className="flex items-center space-x-2 sm:space-x-4 text-gray-700 text-xs sm:text-base">
               <FaMapMarkerAlt className="text-lg sm:text-xl text-blue-600" />
-              <span>123 College Ave, University City, CA 12345</span>
+              <span>ABCD, Bhopal, Madhaya Pradesh</span>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4 text-gray-700 text-xs sm:text-base">
               <FaPhone className="text-lg sm:text-xl text-blue-600" />
-              <span>+1 (123) 456-7890</span>
+              <span>+91 62017XXXXX</span>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4 text-gray-700 text-xs sm:text-base">
               <FaEnvelope className="text-lg sm:text-xl text-blue-600" />

@@ -35,9 +35,9 @@ const Home = ({ toggleMobileMenu, scrollToSection }) => {
         <HeroSection />
 
         {/* Feature Cards with scroll-based animations */}
-        <section id="features">
+        {/* <section id="features">
           <FeatureCards />
-        </section>
+        </section> */}
 
         <Testimonials />
 

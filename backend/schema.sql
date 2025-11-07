@@ -283,3 +283,9 @@ VALUES ('New Semester', 'Semester registration is now open.', 'student');
 -- Specific notification for a faculty member with faculty_id = 5
 INSERT INTO Notifications (title, message, user_type, recipient_id)
 VALUES ('Meeting Reminder', 'Please attend the departmental meeting at 3 PM.', 'faculty', 5);
+
+
+ALTER TABLE books
+ADD COLUMN pdf_url VARCHAR(255) NULL;
+
+

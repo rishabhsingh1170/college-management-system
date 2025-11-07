@@ -52,6 +52,13 @@ import Attendance from "./components/user/Attendence";
 import VerifyOTP from "./pages/VerifyOTP";
 import ResetPassword from './pages/ResetPassword'
 
+//Library
+
+import AdminLayout from "./pages/AdminLayout";
+import Library from "./pages/Admin/Library";
+
+
+
 function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -141,8 +148,9 @@ function App() {
                 <Route path="student-list" element={<StudentList />} />
                 <Route path="student-details" element={<StudentDetails />} />
                 <Route path="faculty-list" element={<FacultyList />} />
-                <Route path="library" element={<LibraryDetails />} />
+                <Route path="library" element={<Library />} />
                 <Route path="support" element={<SupportAdmin />} />
+
               </Route>
 
               {/* Faculty Dashboard */}
@@ -179,6 +187,8 @@ function App() {
             </Route>
 
             <Route path="*" element={<NotFound />} />
+
+
           </Routes>
         </div>
       </BrowserRouter>

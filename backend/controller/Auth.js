@@ -127,15 +127,24 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid user_type" });
     }
 
-    const tokenPayload = {
+    let tokenPayload = {
       user_type,
       name: userInfo.name,
-      id: authUser.auth_id,
-      student_id: userInfo.student_id,
-      faculty_id: userInfo.faculty_id,
     };
 
-    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: "1d" });
+// ✅ Store correct ID based on user type
+    if (user_type === "student") {
+      tokenPayload.user_id = userInfo.student_id;
+    } else if (user_type === "faculty" || user_type === "admin") {
+        tokenPayload.user_id = userInfo.faculty_id;
+      }
+
+// ✅ Create token
+     const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: "1d" });
+
+
+    
+    
 
     res.json({
       token,

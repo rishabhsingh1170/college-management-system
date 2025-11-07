@@ -6,7 +6,7 @@ import {
   submitAttendance,
 } from "../controller/Attendence.js";
 import { getFacultyProfile } from "../controller/Profile.js";
-import { getNotifications } from "../controller/notification.js";
+import { getNotifications } from "../controller/Notification.js";
 import { getFacultySalary } from "../controller/Salary.js";
 import { getFacultyCourses, getFacultyTeachingData } from "../controller/Courses.js";
 

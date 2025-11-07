@@ -7,6 +7,9 @@ import studentRoutes from "./routes/Student.js";
 import facultyRoutes from "./routes/Faculty.js";
 import { pool } from "./config/database.js";
 
+
+
+
 dotenv.config();
 
 const app = express();
@@ -17,6 +20,13 @@ app.use(
   })
 );
 app.use(express.json());
+
+//library
+import AdminLibraryRoutes from "./routes/AdminLibrary.js";
+app.use("/api/admin/library", AdminLibraryRoutes);
+
+app.use("/uploads", express.static("uploads"));
+
 
 // Basic route
 app.get("/", (req, res) => {

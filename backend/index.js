@@ -25,6 +25,10 @@ app.use(express.json());
 import AdminLibraryRoutes from "./routes/AdminLibrary.js";
 app.use("/api/admin/library", AdminLibraryRoutes);
 
+//for faculty and students 
+import libraryPublicRoutes from "./routes/LibraryPublic.js";
+app.use("/api/library", libraryPublicRoutes);
+
 app.use("/uploads", express.static("uploads"));
 
 

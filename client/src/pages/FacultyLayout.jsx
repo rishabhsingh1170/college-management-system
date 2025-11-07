@@ -16,6 +16,7 @@ const facultyNavItems = [
   { name: "Courses", path: "/faculty/cources", icon: FaBook },
   { name: "TimeTable", path: "/faculty/timetable", icon: FaCalendarAlt },
   { name: "Attendance", path: "/faculty/attendence", icon: FaCheckCircle },
+  { name: "Library", path: "library", icon: FaBook },
 ];
 
 const FacultyLayout = () => {

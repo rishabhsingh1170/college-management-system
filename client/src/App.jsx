@@ -55,7 +55,13 @@ import ResetPassword from './pages/ResetPassword'
 //Library
 
 import AdminLayout from "./pages/AdminLayout";
-import Library from "./pages/Admin/Library";
+import AdminLibrary from "./pages/Admin/Library";
+
+// Library
+
+import StudentLibrary from "./pages/User/Library";
+import FacultyLibrary from "./pages/Faculty/Library";
+
 
 
 
@@ -98,6 +104,7 @@ function App() {
     { name: "Results", path: "results", icon: FaClipboardList },
     // { name: "Admission", path: "admission", icon: FaAddressCard },
     { name: "Fees", path: "fees", icon: FaDollarSign },
+    { name: "Library", path: "library", icon: FaBook },
     { name: "Help", path: "help", icon: FaQuestionCircle },
   ];
 
@@ -107,6 +114,7 @@ function App() {
     { name: "Salary", path: "salary", icon: FaDollarSign },
     { name: "Courses", path: "cources", icon: FaBook },
     { name: "Attendance", path: "attendence", icon: FaCheckCircle },
+    { name: "Library", path: "library", icon: FaBook },
   ];
 
   return (
@@ -148,7 +156,7 @@ function App() {
                 <Route path="student-list" element={<StudentList />} />
                 <Route path="student-details" element={<StudentDetails />} />
                 <Route path="faculty-list" element={<FacultyList />} />
-                <Route path="library" element={<Library />} />
+                <Route path="library" element={<AdminLibrary />} />
                 <Route path="support" element={<SupportAdmin />} />
 
               </Route>
@@ -168,6 +176,8 @@ function App() {
                 <Route path="salary" element={<Salary />} />
                 <Route path="cources" element={<Cources />} />
                 <Route path="attendence" element={<Attendence />} />
+                <Route path="library" element={<FacultyLibrary />} />
+
               </Route>
 
               {/* User Dashboard */}
@@ -183,6 +193,8 @@ function App() {
                 <Route path="results" element={<ResultUser />} />
                 <Route path="admission" element={<AdmissionUser />} />
                 <Route path="help" element={<HelpUser />} />
+                <Route path="library" element={<StudentLibrary />} />
+
               </Route>
             </Route>
 

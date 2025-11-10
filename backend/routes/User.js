@@ -5,8 +5,6 @@ import {
   verifyOtp,
   resetPassword,
 } from "../controller/PasswordReset.js";
-import { authenticateToken } from "../middleware/auth.js";
-import { getNotifications } from "../controller/notification.js";
 
 const router = express.Router();
 

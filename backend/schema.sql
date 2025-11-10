@@ -260,26 +260,3 @@ CREATE TABLE BorrowBooks (
     PRIMARY KEY (borrower_id, borrower_type, book_id, borrow_date),
     FOREIGN KEY (book_id) REFERENCES Books(book_id)
 );
-
--- Table for storing notifications for students, faculty, and admins
-CREATE TABLE IF NOT EXISTS Notifications (
-    notification_id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    message TEXT NOT NULL,
-    user_type ENUM('student', 'faculty', 'admin') NOT NULL,
-    recipient_id INT NULL,  -- NULL for general announcements, otherwise links to the user's ID
-    is_read BOOLEAN DEFAULT FALSE,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    
-    -- No foreign key is needed here, as recipient_id could refer to different tables
-    -- (Student, Faculty, etc.). The user_type column handles this.
-);
-
--- Example Data Insertion:
--- General announcement for all students
-INSERT INTO Notifications (title, message, user_type)
-VALUES ('New Semester', 'Semester registration is now open.', 'student');
-
--- Specific notification for a faculty member with faculty_id = 5
-INSERT INTO Notifications (title, message, user_type, recipient_id)
-VALUES ('Meeting Reminder', 'Please attend the departmental meeting at 3 PM.', 'faculty', 5);

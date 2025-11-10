@@ -1,46 +1,85 @@
 import express from "express";
 import { authenticateToken } from "../middleware/auth.js";
-import { publishNotification, deleteNotification } from "../controller/Notification.js";
-import { getFacultyBasicDetails, getFacultyDetailsForAdmin, getFacultyList, getStudentBasicDetails, getStudentDetailsForAdmin, getStudentsWithPendingFees, updateFacultyDetails, updateStudentDetails } from "../controller/Profile.js";
+import {
+  publishNotification,
+  deleteNotification
+} from "../controller/Notification.js";
+import {
+  getFacultyBasicDetails,
+  getFacultyDetailsForAdmin,
+  getFacultyList,
+  getStudentBasicDetails,
+  getStudentDetailsForAdmin,
+  getStudentsWithPendingFees,
+  updateFacultyDetails,
+  updateStudentDetails
+} from "../controller/Profile.js";
 import { updateFeeStatus } from "../controller/Fees.js";
-import { getSupportTickets, updateSupportTicketStatus } from "../controller/HelpAndSupport.js";
+import {
+  getSupportTickets,
+  updateSupportTicketStatus
+} from "../controller/HelpAndSupport.js";
+
+import upload from "../config/multer.js";  // ✅ PDF Upload middleware
+import db from "../config/database.js";  // ✅ MySQL connection
 
 const router = express.Router();
 
+// ✅ Existing routes...
 router.post("/notifications/publish", authenticateToken, publishNotification);
 router.delete('/delete-notifications/:notificationId', authenticateToken, deleteNotification);
-
-// GET a student's basic details
 router.get('/student/:studentId/basic', authenticateToken, getStudentBasicDetails);
-
-// GET a list of students with pending fees
 router.get('/students/pending-fees', authenticateToken, getStudentsWithPendingFees);
-
-// 3. GET student details for the edit form
 router.get('/student/:studentId', authenticateToken, getStudentDetailsForAdmin);
-
-// 4. PUT request to update a student's personal details
 router.put('/student/:studentId', authenticateToken, updateStudentDetails);
-
-// 5. PUT request to update a specific fee record
 router.put('/fees/:feeId', authenticateToken, updateFeeStatus);
-
-// 2. GET BASIC DETAILS for a single faculty (for search preview)
 router.get('/faculty/:facultyId/basic', authenticateToken, getFacultyBasicDetails)
-
-// 1. GET ALL FACULTY MEMBERS (for the main list)
 router.get('/faculty-list', authenticateToken, getFacultyList)
-
-// 3. GET FULL DETAILS for a single faculty (for the edit form)
 router.get('/faculty/:facultyId', authenticateToken, getFacultyDetailsForAdmin);
-
-// 4. PUT to update a faculty member's details
 router.put('/faculty/:facultyId', authenticateToken, updateFacultyDetails);
-
-//admin get all suppot tickets
 router.get("/get-support-tickets", authenticateToken, getSupportTickets);
-
-//admin can update suppot tickets status
 router.put("/update-support-tickets/:supportId/status", authenticateToken, updateSupportTicketStatus);
+
+
+// ✅ ✅ ✅ Library Routes Added Here ✅ ✅ ✅
+
+// POST ➝ Add Book + Upload PDF
+router.post(
+  "/library/books",
+  authenticateToken,
+  upload.single("pdf_file"),
+  (req, res) => {
+
+    const { title, author, category, total_copies, available_copies } = req.body;
+    const pdf_url = req.file ? req.file.path : null;
+
+    const query = `
+      INSERT INTO books (title, author, category, total_copies, available_copies, pdf_url)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(
+      query,
+      [title, author, category, total_copies, available_copies, pdf_url],
+      (err) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ message: "Error adding book" });
+        }
+        res.status(201).json({ message: "Book added successfully" });
+      }
+    );
+  }
+);
+
+
+// ✅ Get all books (for frontend list)
+router.get("/library/books", authenticateToken, (req, res) => {
+  db.query("SELECT * FROM books", (err, results) => {
+    if (err) return res.status(500).json({ message: "Error fetching books" });
+    res.json(results);
+  });
+});
+
 
 export default router;

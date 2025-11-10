@@ -126,17 +126,17 @@ export const login = async (req, res) => {
     } else {
       return res.status(400).json({ message: "Invalid user_type" });
     }
-
-    const tokenPayload = {
-      user_type,
-      name: userInfo.name,
-      id: authUser.auth_id,
-      student_id: userInfo.student_id,
-      faculty_id: userInfo.faculty_id,
-    };
-
-    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: "1d" });
-
+    const token = jwt.sign(
+      {
+        id: authUser.auth_id,
+        user_type,
+        name: userInfo.name,
+        student_id: authUser.student_id,
+        faculty_id: authUser.faculty_id,
+      },
+      JWT_SECRET,
+      { expiresIn: "1d" }
+    );
     res.json({
       token,
       user_type,

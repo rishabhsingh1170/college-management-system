@@ -55,7 +55,7 @@ const FacultyManagement = () => {
   const handleViewDetails = async (facultyId) => {
     try {
         setLoading(true);
-        // *** CORRECTED ENDPOINT ***: Use the endpoint that returns all details
+        // the endpoint that returns all details
         const response = await getRequest(`/admin/faculty/${facultyId}`); 
         
         // The full response has { faculty: {...}, departments: [...] }

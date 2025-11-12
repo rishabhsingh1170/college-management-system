@@ -202,10 +202,10 @@ const Profile = ({ userType }) => {
                 <FaBuilding className="text-blue-500" />
                 <span>Department: {user.department}</span>
               </div>
-              <div className="flex items-center space-x-3 text-gray-700">
+              {/* <div className="flex items-center space-x-3 text-gray-700">
                 <FaCalendarAlt className="text-blue-500" />
                 <span>Joining Date: {user.joiningDate}</span>
-              </div>
+              </div> */}
             </>
           ) : userType === "admin" ? (
             <>

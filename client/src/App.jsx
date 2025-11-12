@@ -51,6 +51,8 @@ import ProtectedRoute from "./components/common/ProtectedRoute";
 import Attendance from "./components/user/Attendence";
 import VerifyOTP from "./pages/VerifyOTP";
 import ResetPassword from './pages/ResetPassword'
+import LibraryUser from "./components/user/Library";
+import LibraryFact from "./components/faculty/Library"; 
 
 function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -89,7 +91,7 @@ function App() {
     { name: "Notifications", path: "notification", icon: FaBell },
     { name: "Track Attendence", path: "get-attendance", icon: FaCalendarAlt },
     { name: "Results", path: "results", icon: FaClipboardList },
-    // { name: "Admission", path: "admission", icon: FaAddressCard },
+    { name: "Library", path: "library", icon: FaBook },
     { name: "Fees", path: "fees", icon: FaDollarSign },
     { name: "Help", path: "help", icon: FaQuestionCircle },
   ];
@@ -100,6 +102,7 @@ function App() {
     { name: "Salary", path: "salary", icon: FaDollarSign },
     { name: "Courses", path: "cources", icon: FaBook },
     { name: "Attendance", path: "attendence", icon: FaCheckCircle },
+    { name: "Library", path: "library", icon: FaBook },
   ];
 
   return (
@@ -160,6 +163,7 @@ function App() {
                 <Route path="salary" element={<Salary />} />
                 <Route path="cources" element={<Cources />} />
                 <Route path="attendence" element={<Attendence />} />
+                <Route path="library" element={<LibraryFact />} />
               </Route>
 
               {/* User Dashboard */}
@@ -173,6 +177,7 @@ function App() {
                 <Route path="notification" element={<NotificationUser />} />
                 <Route path="get-attendance" element={<Attendance />} />
                 <Route path="results" element={<ResultUser />} />
+                <Route path="library" element={<LibraryUser />} />
                 <Route path="admission" element={<AdmissionUser />} />
                 <Route path="help" element={<HelpUser />} />
               </Route>

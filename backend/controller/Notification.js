@@ -68,21 +68,14 @@ export const getNotifications = async (req, res) => {
 
 //post a notification (admin only)
 export const publishNotification = async (req, res) => {
+  let conn; // Initialize connection outside try-catch
   try {
     const authHeader = req.headers["authorization"];
     const token = authHeader?.split(" ")[1];
-    if (!token) {
-      return res.status(401).json({ message: "No token provided" });
-    }
+    if (!token) return res.status(401).json({ message: "No token provided" });
 
-    let decoded;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (err) {
-      return res.status(401).json({ message: "Invalid token" });
-    }
+    let decoded = jwt.verify(token, JWT_SECRET);
 
-    // Only allow admins to publish notifications
     if (decoded.user_type !== "admin") {
       return res
         .status(403)
@@ -94,16 +87,33 @@ export const publishNotification = async (req, res) => {
       return res.status(400).json({ message: "All fields are required." });
     }
 
-    const query = `
-      INSERT INTO Notifications (title, message, user_type)
-      VALUES (?, ?, ?);
-    `;
-    await pool.query(query, [title, message, user_type]);
+    const insertQuery = `
+          INSERT INTO Notifications (title, message, user_type)
+          VALUES (?, ?, ?);
+        `;
 
+    conn = await pool.getConnection();
+    await conn.beginTransaction();
+
+    if (user_type === "both") {
+      // Handle 'both': insert one record for student and one for faculty
+      await conn.query(insertQuery, [title, message, "student"]);
+      await conn.query(insertQuery, [title, message, "faculty"]);
+    } else {
+      // Standard insert for 'student', 'faculty', or 'admin'
+      await conn.query(insertQuery, [title, message, user_type]);
+    }
+
+    await conn.commit();
     res.status(201).json({ message: "Notification published successfully." });
   } catch (err) {
+    if (conn) await conn.rollback();
     console.error("Server error:", err);
-    res.status(500).json({ message: "Server error" });
+    res
+      .status(500)
+      .json({ message: "Server error: Failed to publish notification." });
+  } finally {
+    if (conn) conn.release();
   }
 };
 

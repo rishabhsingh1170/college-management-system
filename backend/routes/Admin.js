@@ -4,6 +4,7 @@ import { publishNotification, deleteNotification } from "../controller/Notificat
 import { getFacultyBasicDetails, getFacultyDetailsForAdmin, getFacultyList, getStudentBasicDetails, getStudentDetailsForAdmin, getStudentsWithPendingFees, updateFacultyDetails, updateStudentDetails } from "../controller/Profile.js";
 import { updateFeeStatus } from "../controller/Fees.js";
 import { getSupportTickets, updateSupportTicketStatus } from "../controller/HelpAndSupport.js";
+import { addBook, getBooks, getBorrowedBooks, getOverdueFines } from "../controller/Library.js";
 
 const router = express.Router();
 
@@ -42,5 +43,11 @@ router.get("/get-support-tickets", authenticateToken, getSupportTickets);
 
 //admin can update suppot tickets status
 router.put("/update-support-tickets/:supportId/status", authenticateToken, updateSupportTicketStatus);
+
+//library fines and books
+router.get("/books", authenticateToken, getBooks);
+router.get("/books/borrowed", authenticateToken, getBorrowedBooks);
+router.get("/books/fines", authenticateToken, getOverdueFines);
+router.post("/books/add", authenticateToken, addBook);
 
 export default router;

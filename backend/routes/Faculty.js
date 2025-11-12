@@ -9,6 +9,7 @@ import { getFacultyProfile } from "../controller/Profile.js";
 import { getNotifications } from "../controller/notification.js";
 import { getFacultySalary } from "../controller/Salary.js";
 import { getFacultyCourses, getFacultyTeachingData } from "../controller/Courses.js";
+import { getFacultyLibraryRecords } from "../controller/Library.js";
 
 const router = express.Router();
 
@@ -36,5 +37,8 @@ router.get(
   authenticateToken,
   getAttendanceOfAllStudent
 );
+
+//get faculty library records
+router.get("/library", authenticateToken, getFacultyLibraryRecords);
 
 export default router;

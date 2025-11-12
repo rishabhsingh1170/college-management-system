@@ -17,11 +17,11 @@ import "aos/dist/aos.css";
 
 // Mock data for FAQs
 const faqs = [
-  {
-    question: "How do I update my profile information?",
-    answer:
-      "You can update your personal details by navigating to the 'Profile' section in your dashboard. Click on the 'Edit' button and save your changes after making the necessary updates.",
-  },
+  // {
+  //   question: "How do I update my profile information?",
+  //   answer:
+  //     "You can update your personal details by navigating to the 'Profile' section in your dashboard. Click on the 'Edit' button and save your changes after making the necessary updates.",
+  // },
   // {
   //   question: "Where can I find my course schedule?",
   //   answer:

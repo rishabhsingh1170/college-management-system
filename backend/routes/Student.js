@@ -6,6 +6,7 @@ import { getFees } from "../controller/Fees.js";
 import { getStudentProfile } from "../controller/Profile.js";
 import { getStudentResults } from "../controller/Result.js";
 import { getStudentSupportTickets, submitSupportTicket } from "../controller/HelpAndSupport.js";
+import { getStudentLibraryRecords } from "../controller/Library.js";
 
 const router = express.Router();
 
@@ -26,6 +27,9 @@ router.get("/get-attendence", authenticateToken, getStudentAttendance);
 
 //get fees details;
 router.get("/get-fees-details", authenticateToken, getFees);
+
+//get library records
+router.get("/library", authenticateToken, getStudentLibraryRecords);
 
 
 

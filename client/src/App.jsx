@@ -50,9 +50,10 @@ import MobileMenu from "./components/common/MobileMenu";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import Attendance from "./components/user/Attendence";
 import VerifyOTP from "./pages/VerifyOTP";
-import ResetPassword from './pages/ResetPassword'
+import ResetPassword from "./pages/ResetPassword";
 import LibraryUser from "./components/user/Library";
-import LibraryFact from "./components/faculty/Library"; 
+import LibraryFact from "./components/faculty/Library";
+import FeeUser from "./components/user/Fee";
 
 function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -129,7 +130,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="forgot-password" element={<ForgetPassword />} />
             <Route path="verify-otp" element={<VerifyOTP />} />
-            <Route path="reset-password" element = {<ResetPassword/>}/>
+            <Route path="reset-password" element={<ResetPassword />} />
 
             <Route element={<ProtectedRoute />}>
               {/* Admin Dashboard */}
@@ -179,6 +180,7 @@ function App() {
                 <Route path="results" element={<ResultUser />} />
                 <Route path="library" element={<LibraryUser />} />
                 <Route path="admission" element={<AdmissionUser />} />
+                <Route path="fees" element={<FeeUser />} />
                 <Route path="help" element={<HelpUser />} />
               </Route>
             </Route>

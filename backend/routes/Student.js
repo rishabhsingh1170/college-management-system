@@ -2,7 +2,7 @@ import express from "express";
 import { authenticateToken } from "../middleware/auth.js";
 import {getStudentAttendance } from "../controller/Attendence.js";
 import { getTimetable } from "../controller/TimeTable.js";
-import { getFees } from "../controller/Fees.js";
+import { getFees, initiatePayment, verifyPayment } from "../controller/Fees.js";
 import { getStudentProfile } from "../controller/Profile.js";
 import { getStudentResults } from "../controller/Result.js";
 import { getStudentSupportTickets, submitSupportTicket } from "../controller/HelpAndSupport.js";
@@ -27,6 +27,11 @@ router.get("/get-attendence", authenticateToken, getStudentAttendance);
 
 //get fees details;
 router.get("/get-fees-details", authenticateToken, getFees);
+//initiate payment
+router.post("/fees/pay/initiate", authenticateToken, initiatePayment);
+
+//verify payment
+router.post("/fees/pay/verify", authenticateToken, verifyPayment);
 
 //get library records
 router.get("/library", authenticateToken, getStudentLibraryRecords);

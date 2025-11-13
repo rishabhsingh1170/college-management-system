@@ -5,7 +5,7 @@ const SALT_ROUNDS = 10; // The cost factor for bcrypt hashing
 
 export const requestPasswordReset = async (req, res) => {
   const { email } = req.body;
-  // console.log(email);
+  console.log(email);
   if (!email) {
     return res
       .status(400)
@@ -46,9 +46,7 @@ export const requestPasswordReset = async (req, res) => {
       .json({ message: "An OTP has been sent to your email.", email: email });
   } catch (err) {
     console.error("Server error:", err);
-    res
-      .status(500)
-      .json({ message: "An unexpected server error occurred." });
+    res.status(500).json({ message: "An unexpected server error occurred." });
   }
 };
 
@@ -71,14 +69,13 @@ export const verifyOtp = async (req, res) => {
 
 export const resetPassword = async (req, res) => {
   const { email, otp, password } = req.body;
-  console.log(email);
   if (!email || !otp || !password) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
   let conn;
   try {
-    // Check for valid and unexpired OTP in one query
+    // 1. Check for valid and unexpired OTP
     const [otpRows] = await pool.query(
       "SELECT * FROM PasswordResetOTPs WHERE email = ? AND otp = ? AND used = FALSE ORDER BY created_at DESC LIMIT 1",
       [email, otp]
@@ -93,7 +90,7 @@ export const resetPassword = async (req, res) => {
       return res.status(400).json({ message: "OTP expired." });
     }
 
-    // Corrected SQL logic: Find the user's auth_id efficiently
+    // 2. Find the user's auth_id
     const [userRows] = await pool.query(
       "SELECT auth_id FROM Student WHERE email = ? UNION SELECT auth_id FROM Faculty WHERE email = ?",
       [email, email]
@@ -104,26 +101,23 @@ export const resetPassword = async (req, res) => {
     }
     const authId = userRows[0].auth_id;
 
-    // Hash the new password with bcrypt
-    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-
-    // Use a database transaction to ensure atomicity
+    // 3. Begin Transaction
     conn = await pool.getConnection();
     await conn.beginTransaction();
 
+    // 4. Update password with PLAIN TEXT password
     await conn.query(
       "UPDATE AuthenticatePersons SET password = ? WHERE auth_id = ?",
-      [hashedPassword, authId]
+      [password, authId] // <-- Using plain text password here
     );
 
-    await conn.query(
-      "UPDATE PasswordResetOTPs SET used = TRUE WHERE id = ?",
-      [record.id]
-    );
+    // 5. Mark OTP as used
+    await conn.query("UPDATE PasswordResetOTPs SET used = TRUE WHERE id = ?", [
+      record.id,
+    ]);
 
     await conn.commit();
     res.json({ message: "Password reset successful." });
-
   } catch (err) {
     if (conn) await conn.rollback();
     console.error("Server error:", err);

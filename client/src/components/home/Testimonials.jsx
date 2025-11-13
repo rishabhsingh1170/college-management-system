@@ -5,19 +5,19 @@ const testimonials = [
   {
     quote:
       "The student portal has made managing my academic life so much easier. I can check grades and assignments from anywhere!",
-    name: "Alex Johnson",
+    name: "Jyoti Suman",
     role: "Current Student",
   },
   {
     quote:
       "As a faculty member, the new system has streamlined my administrative tasks. It's intuitive and saves me so much time.",
-    name: "Dr. Emily Carter",
+    name: "Shiddaarth",
     role: "Faculty Member",
   },
   {
     quote:
       "The admission process was incredibly smooth. I received updates in real-time and all my documents were handled securely.",
-    name: "Sarah Lee",
+    name: "Shivanshu Pal",
     role: "New Admit",
   },
 ];

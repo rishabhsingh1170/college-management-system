@@ -119,6 +119,7 @@ export const publishNotification = async (req, res) => {
 
 //delete notification
 export const deleteNotification = async (req, res) => {
+  console.log("delerting notification");
   try {
     const authHeader = req.headers["authorization"];
     const token = authHeader?.split(" ")[1];

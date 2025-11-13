@@ -105,7 +105,6 @@ export const login = async (req, res) => {
     const authUser = authRows[0];
     let userInfo = {};
 
-    // Key Change: Combine Faculty and Admin logic
     if (user_type === "student") {
       const [studentRows] = await pool.query(
         "SELECT student_id, name, email FROM Student WHERE auth_id = ? AND (email = ? OR name = ?)",

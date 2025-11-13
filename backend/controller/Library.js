@@ -33,7 +33,7 @@ export const addBook = async (req, res) => {
   }
 };
 
-// Assume fine is $5 per day overdue (you can adjust this logic)
+//fine is rs 5 per day overdue
 const FINE_PER_DAY = 5.0;
 const MAX_LOAN_DAYS = 14;
 
@@ -155,7 +155,7 @@ export const getStudentLibraryRecords = async (req, res) => {
     const studentId = decoded.student_id;
     const borrowerType = "student";
 
-    // Query to get currently borrowed books (return_date IS NULL)
+    // to get currently borrowed books (return_date IS NULL)
     const query = `
       SELECT
         bb.borrow_date,

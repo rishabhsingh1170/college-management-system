@@ -104,7 +104,9 @@ const NotificationAdmin = () => {
     try {
       toast.loading("Deleting notification...", { id: "delete-toast" });
       // Corrected endpoint for deleting notification
-      await deleteRequest(`/admin/notifications/${notificationToDelete}`);
+      await deleteRequest(
+        `/admin/delete-notifications/${notificationToDelete}`
+      );
       toast.dismiss("delete-toast");
       toast.success("Notification deleted successfully!");
       fetchNotifications();

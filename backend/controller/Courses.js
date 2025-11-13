@@ -19,7 +19,7 @@ export const getFacultyCourses = async (req, res) => {
        decoded = jwt.verify(token, JWT_SECRET);
      } catch (err) {
        return res.status(401).json({ message: "Invalid token" });
-     }
+      }
 
      if (decoded.user_type !== "faculty") {
        return res
@@ -29,7 +29,6 @@ export const getFacultyCourses = async (req, res) => {
 
      const facultyId = decoded.faculty_id;
 
-     // Corrected SQL query to get a flat list of subjects only
      const query = `
       SELECT DISTINCT
         sub.subject_id,

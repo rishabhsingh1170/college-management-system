@@ -6,6 +6,7 @@ import adminRoutes from "./routes/Admin.js";
 import studentRoutes from "./routes/Student.js";
 import facultyRoutes from "./routes/Faculty.js";
 import { pool } from "./config/database.js";
+import { sendContactMail } from "./controller/ContactUs.js";
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use("/api/v1/auth", userRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/student", studentRoutes);
 app.use("/api/v1/faculty", facultyRoutes);
+app.post('/api/v1/contact', sendContactMail);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

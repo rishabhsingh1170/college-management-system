@@ -130,7 +130,7 @@ const Salary = () => {
           data-aos="fade-left"
           data-aos-delay="300"
         >
-          <h3 className="text-2xl font-bold text-gray-800 mb-4">
+          {/* <h3 className="text-2xl font-bold text-gray-800 mb-4">
             Pay Slip History
           </h3>
           <div className="bg-gray-50 rounded-xl shadow-md">
@@ -168,7 +168,7 @@ const Salary = () => {
                 No pay slip history found.
               </div>
             )}
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { pool } from "../config/database.js"; // Your database connection pool
+import { pool } from "../config/database.js"; 
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -155,7 +155,7 @@ export const submitAttendance = async (req, res) => {
     const subjectId = attendanceRecords[0].subject_id;
     const submissionDate = attendanceRecords[0].date;
 
-    // New Logic: Check for existing submission
+    // Check for existing submission
     const checkQuery = `
       SELECT COUNT(*) AS count
       FROM Attendance

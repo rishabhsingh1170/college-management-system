@@ -206,6 +206,14 @@ function Login() {
               >
                 {passwordShown ? <FaEyeSlash /> : <FaEye />}
               </button>
+
+              <Link
+                to="/"
+                className="absolute left-2 -bottom-6 text-sm text-blue-500 hover:underline hover:text-blue-600 transition-all duration-150"
+              >
+                Home
+              </Link>
+
               <Link
                 to="/forgot-password"
                 className="absolute right-0 -bottom-6 text-sm text-blue-500 hover:underline hover:text-blue-600 transition-all duration-150"
@@ -226,7 +234,7 @@ function Login() {
               >
                 {loading ? "Logging in..." : "LOG IN"}
               </button>
-            </div> 
+            </div>
           </form>
 
           {error && <p className="text-red-400 text-center mt-4">{error}</p>}

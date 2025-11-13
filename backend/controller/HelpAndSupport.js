@@ -134,3 +134,4 @@ export const updateSupportTicketStatus = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+

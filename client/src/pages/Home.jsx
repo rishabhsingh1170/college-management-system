@@ -31,10 +31,10 @@ const Home = ({ toggleMobileMenu, scrollToSection }) => {
       />
 
       <main>
-        {/* Hero Section with typing animation */}
+       
         <HeroSection />
 
-        {/* Feature Cards with scroll-based animations */}
+        {/* Feature Cards */}
         {/* <section id="features">
           <FeatureCards />
         </section> */}
@@ -52,7 +52,6 @@ const Home = ({ toggleMobileMenu, scrollToSection }) => {
         <AboutSection />
       </main>
 
-      {/* Optional: Add a Footer component here */}
       <Footer />
     </div>
   );
